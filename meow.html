@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Pixel Grid</title>
+  <title>7chichGEN</title>
   <style>
     body {
       display: flex;
@@ -31,7 +31,7 @@
   </style>
 </head>
 <body>
-  <h2>Pixel Grid Viewer</h2>
+  <h2>7chichGEN</h2>
   
   <div class="controls">
     <label>Color 0 <input type="color" id="c0" value="#cc1111"></label>
@@ -262,22 +262,19 @@
         document.getElementById('c4').value
       ];
       
-      // Clear
       cells.forEach(cell => cell.style.background = '#fff');
       ctx.fillStyle = '#fff';
       ctx.fillRect(0, 0, 32, 32);
       
-      // Apply pixels
       for (const [x,y,c] of pixels) {
         const idx = y * 32 + x;
         cells[idx].style.background = colors[c];
         
         ctx.fillStyle = colors[c];
-        ctx.fillRect(x, y, 1, 1); // 1 pixel per cell in canvas
+        ctx.fillRect(x, y, 1, 1);
       }
     }
     
-    // Hook up color inputs
     for (let i = 0; i < 5; i++) {
       document.getElementById('c' + i).addEventListener('input', render);
     }
@@ -285,7 +282,6 @@
     document.getElementById('download').addEventListener('click', () => {
       const filename = document.getElementById('filename').value || 'pixel-art';
       const link = document.createElement('a');
-      // Scale up the canvas for download (optional, e.g., ×16)
       const scale = 16;
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = 32 * scale;
