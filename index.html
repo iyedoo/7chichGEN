@@ -3,299 +3,82 @@
 <head>
   <meta charset="UTF-8">
   <title>7chichGEN</title>
-  <style>
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-family: sans-serif;
-      margin: 20px;
-    }
-    .controls {
-      margin-bottom: 20px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(32, 12px);
-      grid-template-rows: repeat(32, 12px);
-      margin-bottom: 20px;
-    }
-    .cell {
-      width: 12px;
-      height: 12px;
-      background: #fff;
-    }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
 </head>
 <body>
-  <h2>7chichGEN</h2>
+  <h2><span style="color: red;"">7chich</span>GEN</h2>
   
   <div class="controls">
-    <label>Color 0 <input type="color" id="c0" value="#cc1111"></label>
-    <label>Color 1 <input type="color" id="c1" value="#ee1111"></label>
-    <label>Color 2 <input type="color" id="c2" value="#ff3333"></label>
-    <label>Color 3 <input type="color" id="c3" value="#ff5555"></label>
-    <label>Color 4 <input type="color" id="c4" value="#ff9999"></label>
+    <label data-color="0">
+      <span>Border</span>
+      <div class="color-swatch" id="swatch-0" style="background: #cc1111;"></div>
+    </label>
+    <label data-color="1">
+      <span>Dark</span>
+      <div class="color-swatch" id="swatch-1" style="background: #ee1111;"></div>
+    </label>
+    <label data-color="2">
+      <span>Normal</span>
+      <div class="color-swatch" id="swatch-2" style="background: #ff3333;"></div>
+    </label>
+    <label data-color="3">
+      <span>Light</span>
+      <div class="color-swatch" id="swatch-3" style="background: #ff5555;"></div>
+    </label>
+    <label data-color="4">
+      <span>Lighter</span>
+      <div class="color-swatch" id="swatch-4" style="background: #ff9999;"></div>
+    </label>
   </div>
   
   <div id="grid" class="grid"></div>
   
-  <div class="controls">
-    <input type="text" id="filename" placeholder="Enter file name" value="pixel-art">
-    <button id="download">Download</button>
+  <div class="download-controls">
+    <input type="text" id="filename" placeholder="Enter file name" value="7chicha">
+    <button id="download">Download PNG</button>
+  </div>
+  
+  <div class="color-picker-overlay" id="colorPickerOverlay">
+    <div class="color-picker-card">
+      <button class="close-btn" id="closeColorPicker">&times;</button>
+      
+      <div class="color-picker-left">
+        <div style="position:relative">
+          <canvas id="sv" class="color-picker-canvas"></canvas>
+          <div id="svThumb" class="thumb"></div>
+        </div>
+        <div style="position:relative">
+          <canvas id="hue" class="color-picker-canvas"></canvas>
+          <div id="hueLine" class="hue-line"></div>
+        </div>
+        <div class="color-preview" id="preview"></div>
+      </div>
+      
+      <div class="color-picker-right">
+        <div class="color-picker-input-group">
+          <label>HEX</label>
+          <input id="hex" value="#ff0000">
+        </div>
+        <div class="color-picker-input-group">
+          <label>RGB</label>
+          <input id="rgb" value="255,0,0">
+        </div>
+        <div class="color-picker-input-group">
+          <label>HSV</label>
+          <input id="hsv" value="0,100,100">
+        </div>
+        <div class="color-picker-buttons">
+          <button class="color-picker-btn primary" id="applyColor">Apply</button>
+          <button class="color-picker-btn secondary" id="cancelColor">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
   
   <canvas id="canvas" width="32" height="32" style="display:none;"></canvas>
   
-  <script>
-    const pixels = [
-        [7,6,0],
-        [8,6,0],
-        [9,6,0],
-        [10,6,0],
-        [11,6,0],
-        [5,7,0],
-        [6,7,0],
-        [7,7,3],
-        [8,7,3],
-        [9,7,3],
-        [10,7,3],
-        [11,7,4],
-        [12,7,0],
-        [4,8,0],
-        [5,8,2],
-        [6,8,2],
-        [7,8,2],
-        [8,8,2],
-        [9,8,2],
-        [10,8,3],
-        [11,8,3],
-        [12,8,4],
-        [13,8,0],
-        [5,9,0],
-        [6,9,2],
-        [7,9,2],
-        [8,9,2],
-        [9,9,2],
-        [10,9,2],
-        [11,9,3],
-        [12,9,3],
-        [13,9,4],
-        [14,9,0],
-        [21,9,0],
-        [22,9,0],
-        [23,9,0],
-        [24,9,0],
-        [25,9,0],
-        [6,10,0],
-        [7,10,2],
-        [8,10,2],
-        [9,10,2],
-        [10,10,2],
-        [11,10,2],
-        [12,10,3],
-        [13,10,3],
-        [14,10,0],
-        [19,10,0],
-        [20,10,0],
-        [21,10,4],
-        [22,10,3],
-        [23,10,3],
-        [24,10,3],
-        [25,10,3],
-        [26,10,0],
-        [6,11,0],
-        [7,11,2],
-        [8,11,2],
-        [9,11,2],
-        [10,11,2],
-        [11,11,2],
-        [12,11,2],
-        [13,11,3],
-        [14,11,3],
-        [15,11,0],
-        [18,11,0],
-        [19,11,4],
-        [20,11,3],
-        [21,11,3],
-        [22,11,3],
-        [23,11,2],
-        [24,11,2],
-        [25,11,2],
-        [26,11,2],
-        [27,11,0],
-        [7,12,0],
-        [8,12,2],
-        [9,12,2],
-        [10,12,2],
-        [11,12,2],
-        [12,12,2],
-        [13,12,2],
-        [14,12,3],
-        [15,12,0],
-        [17,12,0],
-        [18,12,4],
-        [19,12,3],
-        [20,12,3],
-        [21,12,2],
-        [22,12,2],
-        [23,12,2],
-        [24,12,2],
-        [25,12,2],
-        [26,12,0],
-        [7,13,0],
-        [8,13,1],
-        [9,13,2],
-        [10,13,2],
-        [11,13,2],
-        [12,13,2],
-        [13,13,2],
-        [14,13,2],
-        [15,13,1],
-        [16,13,0],
-        [17,13,1],
-        [18,13,3],
-        [19,13,2],
-        [20,13,2],
-        [21,13,2],
-        [22,13,2],
-        [23,13,2],
-        [24,13,2],
-        [25,13,0],
-        [8,14,0],
-        [9,14,1],
-        [10,14,1],
-        [11,14,2],
-        [12,14,2],
-        [13,14,2],
-        [14,14,1],
-        [15,14,1],
-        [16,14,0],
-        [17,14,1],
-        [18,14,1],
-        [19,14,2],
-        [20,14,2],
-        [21,14,2],
-        [22,14,1],
-        [23,14,1],
-        [24,14,0],
-        [9,15,0],
-        [10,15,0],
-        [11,15,1],
-        [12,15,1],
-        [13,15,1],
-        [14,15,1],
-        [15,15,1],
-        [16,15,1],
-        [17,15,1],
-        [18,15,1],
-        [19,15,1],
-        [20,15,1],
-        [21,15,1],
-        [22,15,0],
-        [23,15,0],
-        [11,16,0],
-        [12,16,0],
-        [13,16,0],
-        [14,16,0],
-        [15,16,0],
-        [16,16,1],
-        [17,16,0],
-        [18,16,0],
-        [19,16,0],
-        [20,16,0],
-        [21,16,0],
-        [15,17,0],
-        [16,17,1],
-        [17,17,0],
-        [15,18,0],
-        [16,18,1],
-        [17,18,0],
-        [15,19,0],
-        [16,19,1],
-        [17,19,0],
-        [15,20,0],
-        [16,20,1],
-        [17,20,0],
-        [15,21,0],
-        [16,21,1],
-        [17,21,0],
-        [14,22,0],
-        [15,22,2],
-        [16,22,0],
-        [14,23,0],
-        [15,23,2],
-        [16,23,0],
-        [14,24,0],
-        [15,24,2],
-        [16,24,0],
-        [13,25,0],
-        [14,25,3],
-        [15,25,0],
-        [13,26,0],
-        [14,26,3],
-        [15,26,0],
-        [14,27,0]
-    ];
-    
-    const grid = document.getElementById('grid');
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    const cells = [];
-    for (let i = 0; i < 32 * 32; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'cell';
-      cells.push(cell);
-      grid.appendChild(cell);
-    }
-    
-    function render() {
-      const colors = [
-        document.getElementById('c0').value,
-        document.getElementById('c1').value,
-        document.getElementById('c2').value,
-        document.getElementById('c3').value,
-        document.getElementById('c4').value
-      ];
-      
-      cells.forEach(cell => cell.style.background = '#fff');
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(0, 0, 32, 32);
-      
-      for (const [x,y,c] of pixels) {
-        const idx = y * 32 + x;
-        cells[idx].style.background = colors[c];
-        
-        ctx.fillStyle = colors[c];
-        ctx.fillRect(x, y, 1, 1);
-      }
-    }
-    
-    for (let i = 0; i < 5; i++) {
-      document.getElementById('c' + i).addEventListener('input', render);
-    }
-    
-    document.getElementById('download').addEventListener('click', () => {
-      const filename = document.getElementById('filename').value || 'pixel-art';
-      const link = document.createElement('a');
-      const scale = 16;
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = 32 * scale;
-      tempCanvas.height = 32 * scale;
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCtx.imageSmoothingEnabled = false;
-      tempCtx.drawImage(canvas, 0, 0, tempCanvas.width, tempCanvas.height);
-      
-      link.href = tempCanvas.toDataURL('image/png');
-      link.download = filename + '.png';
-      link.click();
-    });
-    
-    render();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
